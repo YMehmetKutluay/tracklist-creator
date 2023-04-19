@@ -1,0 +1,7 @@
+version: '3'
+services:
+  interpreter:
+    image: tracklist:latest
+    volumes:
+      - ./:/main:rw
+    command: python
