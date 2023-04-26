@@ -1,71 +1,8 @@
 import streamlit as st
-from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode, JsCode
+from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode
 
 from src.fetch_data import Spotify
-
-onRowDragEnd = JsCode(
-    """
-function onRowDragEnd(e) {
-    console.log('onRowDragEnd', e);
-}
-"""
-)
-
-getRowNodeId = JsCode(
-    """
-function getRowNodeId(data) {
-    return data.id
-}
-"""
-)
-
-onGridReady = JsCode(
-    """
-function onGridReady() {
-    immutableStore.forEach(
-        function(data, index) {
-            data.id = index;
-            });
-    gridOptions.api.setRowData(immutableStore);
-    }
-"""
-)
-
-onRowDragMove = JsCode(
-    """
-function onRowDragMove(event) {
-    var movingNode = event.node;
-    var overNode = event.overNode;
-
-    var rowNeedsToMove = movingNode !== overNode;
-
-    if (rowNeedsToMove) {
-        var movingData = movingNode.data;
-        var overData = overNode.data;
-
-        immutableStore = newStore;
-
-        var fromIndex = immutableStore.indexOf(movingData);
-        var toIndex = immutableStore.indexOf(overData);
-
-        var newStore = immutableStore.slice();
-        moveInArray(newStore, fromIndex, toIndex);
-
-        immutableStore = newStore;
-        gridOptions.api.setRowData(newStore);
-
-        gridOptions.api.clearFocusedCell();
-    }
-
-    function moveInArray(arr, fromIndex, toIndex) {
-        var element = arr[fromIndex];
-        arr.splice(fromIndex, 1);
-        arr.splice(toIndex, 0, element);
-    }
-}
-"""
-)
-
+from src.utils import get_row_node_id, on_grid_ready, on_row_drag_end, on_row_drag_move
 
 spotify = Spotify()
 
@@ -76,7 +13,7 @@ spotify_username = st.text_input("Fill in Spotify username", "mehkutluay")
 playlist_name = st.text_input("Fill in (public) Spotify playlist", "The Alternative")
 
 
-# @st.cache_data
+@st.cache_data
 def get_all_tracks_pd():
     return spotify.get_tracks_of_playlist(
         spotify_username=spotify_username, playlist_name=playlist_name
@@ -93,13 +30,14 @@ gb.configure_default_column(
 gb.configure_column("name", rowDrag=True, rowDragEntireRow=True)
 gb.configure_grid_options(
     rowDragManaged=True,
-    onRowDragEnd=onRowDragEnd,
+    onRowDragEnd=on_row_drag_end,
     deltaRowDataMode=True,
-    getRowNodeId=getRowNodeId,
-    onGridReady=onGridReady,
+    getRowNodeId=get_row_node_id,
+    onGridReady=on_grid_ready,
     animateRows=True,
-    onRowDragMove=onRowDragMove,
+    onRowDragMove=on_row_drag_move,
 )
+
 gridOptions = gb.build()
 
 data = AgGrid(
