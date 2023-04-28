@@ -2,7 +2,14 @@ import streamlit as st
 from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode
 
 from src.fetch_data import Spotify
-from src.utils import get_row_node_id, on_grid_ready, on_row_drag_end, on_row_drag_move
+from src.utils import (
+    create_grid,
+    delete_row,
+    get_row_node_id,
+    on_grid_ready,
+    on_row_drag_end,
+    on_row_drag_move,
+)
 
 spotify = Spotify()
 
@@ -23,31 +30,14 @@ def get_all_tracks_pd():
 st.header("All Tracks")
 all_tracks_pd = get_all_tracks_pd()
 
-gb = GridOptionsBuilder.from_dataframe(all_tracks_pd)
-gb.configure_default_column(
-    rowDrag=False, rowDragManaged=True, rowDragEntireRow=False, rowDragMultiRow=True
-)
-gb.configure_column("name", rowDrag=True, rowDragEntireRow=True)
-gb.configure_grid_options(
-    rowDragManaged=True,
-    onRowDragEnd=on_row_drag_end,
-    deltaRowDataMode=True,
-    getRowNodeId=get_row_node_id,
-    onGridReady=on_grid_ready,
-    animateRows=True,
-    onRowDragMove=on_row_drag_move,
-)
+if "df_for_grid" not in st.session_state:
+    st.session_state.df_for_grid = all_tracks_pd
 
-gridOptions = gb.build()
+grid = create_grid(st.session_state.df_for_grid)
 
-data = AgGrid(
-    all_tracks_pd,
-    gridOptions=gridOptions,
-    allow_unsafe_jscode=True,
-    update_mode=GridUpdateMode.MANUAL,
-)
-
-st.write(data["data"])
+subtable_button = st.button("Extract table")
+if subtable_button:
+    st.session_state.df_for_grid = delete_row(st.session_state.df_for_grid, grid)
 
 
 # st.dataframe(data=all_tracks_pd.drop("duration_ms", axis=1), use_container_width=True)

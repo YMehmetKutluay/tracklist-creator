@@ -1,4 +1,5 @@
-from st_aggrid import JsCode
+import streamlit as st
+from st_aggrid import AgGrid, AgGridTheme, GridOptionsBuilder, GridUpdateMode, JsCode
 
 
 def convert_ms_to_min_sec(ms: int) -> dict:
@@ -74,3 +75,47 @@ function onRowDragMove(event) {
 }
 """
 )
+
+
+def create_grid(df):
+    gb = GridOptionsBuilder.from_dataframe(df)
+    gb.configure_default_column(
+        rowDrag=False, rowDragManaged=True, rowDragEntireRow=False, rowDragMultiRow=True
+    )
+    gb.configure_column("name", rowDrag=True, rowDragEntireRow=True)
+    gb.configure_selection(selection_mode="multiple", use_checkbox=True)
+    gb.configure_grid_options(
+        rowDragManaged=True,
+        onRowDragEnd=on_row_drag_end,
+        deltaRowDataMode=True,
+        getRowNodeId=get_row_node_id,
+        onGridReady=on_grid_ready,
+        animateRows=True,
+        onRowDragMove=on_row_drag_move,
+    )
+
+    gridOptions = gb.build()
+
+    grid = AgGrid(
+        df,
+        gridOptions=gridOptions,
+        allow_unsafe_jscode=True,
+        update_mode=GridUpdateMode.MANUAL,
+        update_on="MANUAL",
+        fit_columns_on_grid_load=True,
+        theme=AgGridTheme.STREAMLIT,  # Add theme color to the table
+        enable_enterprise_modules=True,
+    )
+
+    return grid
+
+
+def delete_row(df, grid):
+    selected_rows = grid["selected_rows"]
+    if selected_rows:
+        selected_indices = [
+            i["_selectedRowNodeInfo"]["nodeRowIndex"] for i in selected_rows
+        ]
+        df_indices = st.session_state.df_for_grid.index[selected_indices]
+        df = df.drop(df_indices)
+    return df
