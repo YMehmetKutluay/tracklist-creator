@@ -1,5 +1,12 @@
 import streamlit as st
-from st_aggrid import AgGrid, AgGridTheme, GridOptionsBuilder, GridUpdateMode, JsCode
+from st_aggrid import (
+    AgGrid,
+    AgGridTheme,
+    DataReturnMode,
+    GridOptionsBuilder,
+    GridUpdateMode,
+    JsCode,
+)
 
 
 def convert_ms_to_min_sec(ms: int) -> dict:
@@ -82,7 +89,7 @@ def create_grid(df):
     gb.configure_default_column(
         rowDrag=False, rowDragManaged=True, rowDragEntireRow=False, rowDragMultiRow=True
     )
-    gb.configure_column("name", rowDrag=True, rowDragEntireRow=True)
+    # gb.configure_column("name", rowDrag=True, rowDragEntireRow=True)
     gb.configure_selection(selection_mode="multiple", use_checkbox=True)
     gb.configure_grid_options(
         rowDragManaged=True,
@@ -101,10 +108,10 @@ def create_grid(df):
         gridOptions=gridOptions,
         allow_unsafe_jscode=True,
         update_mode=GridUpdateMode.MANUAL,
-        update_on="MANUAL",
         fit_columns_on_grid_load=True,
         theme=AgGridTheme.STREAMLIT,  # Add theme color to the table
         enable_enterprise_modules=True,
+        data_return_mode=DataReturnMode.FILTERED_AND_SORTED,
     )
 
     return grid

@@ -1,4 +1,3 @@
-import numpy as np
 import pandas as pd
 import streamlit as st
 from pandas.api.types import is_bool_dtype, is_numeric_dtype
@@ -83,6 +82,7 @@ def main():
     grid = create_grid(st.session_state.df_for_grid)
     if delete_row_button:
         st.session_state.df_for_grid = delete_row(st.session_state.df_for_grid, grid)
+        grid = create_grid(st.session_state.df_for_grid)
 
 
 if __name__ == "__main__":
