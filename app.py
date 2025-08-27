@@ -45,6 +45,7 @@ st.subheader("Master Table")
 gb = GridOptionsBuilder.from_dataframe(all_tracks_pd)
 gb.configure_default_column(editable=True, groupable=True)
 gb.configure_selection("multiple", use_checkbox=True)
+gb.configure_column("name", headerCheckboxSelection=True)
 grid_options = gb.build()
 
 grid_response = AgGrid(
