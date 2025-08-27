@@ -23,7 +23,6 @@ def get_all_tracks_pd():
 st.header("All Tracks")
 all_tracks_pd = get_all_tracks_pd()
 
-# User input: number of tables
 num_tables = st.number_input(
     "How many tables would you like to generate (max 10)?",
     min_value=1,
@@ -31,29 +30,23 @@ num_tables = st.number_input(
     value=1,
 )
 
-# Session state to store tables
 if "tables" not in st.session_state:
     st.session_state.tables = [
         pd.DataFrame(columns=list(all_tracks_pd.columns)) for _ in range(num_tables)
     ]
 
-# Update number of tables if changed
 if len(st.session_state.tables) != num_tables:
     st.session_state.tables = [
         pd.DataFrame(columns=list(all_tracks_pd.columns)) for _ in range(num_tables)
     ]
 
-# Master table editor
 st.subheader("Master Table")
-# edited_master = st.data_editor(all_tracks_pd, num_rows="dynamic")
 
-# Configure AgGrid
 gb = GridOptionsBuilder.from_dataframe(all_tracks_pd)
 gb.configure_default_column(editable=True, groupable=True)
 gb.configure_selection("multiple", use_checkbox=True)
 grid_options = gb.build()
 
-# Display AgGrid
 grid_response = AgGrid(
     all_tracks_pd,
     gridOptions=grid_options,
