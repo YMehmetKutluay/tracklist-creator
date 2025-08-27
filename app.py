@@ -1,8 +1,8 @@
 import pandas as pd
 import streamlit as st
+from st_aggrid import AgGrid, GridOptionsBuilder
 
 from src.fetch_data import Spotify
-from src.utils import create_grid, delete_row
 
 spotify = Spotify()
 
@@ -23,14 +23,53 @@ def get_all_tracks_pd():
 st.header("All Tracks")
 all_tracks_pd = get_all_tracks_pd()
 
-if "df_for_grid" not in st.session_state:
-    st.session_state.df_for_grid = all_tracks_pd
+# User input: number of tables
+num_tables = st.number_input(
+    "How many tables would you like to generate (max 10)?",
+    min_value=1,
+    max_value=10,
+    value=1,
+)
 
-subtable_button = st.button("Extract table")
+# Session state to store tables
+if "tables" not in st.session_state:
+    st.session_state.tables = [
+        pd.DataFrame(columns=list(all_tracks_pd.columns)) for _ in range(num_tables)
+    ]
 
-grid = create_grid(st.session_state.df_for_grid)
+# Update number of tables if changed
+if len(st.session_state.tables) != num_tables:
+    st.session_state.tables = [
+        pd.DataFrame(columns=list(all_tracks_pd.columns)) for _ in range(num_tables)
+    ]
 
-if subtable_button:
-    sub_table = grid["selected_rows"]
-    st.session_state.df_for_grid = delete_row(st.session_state.df_for_grid, grid)
-    st.write(pd.DataFrame(sub_table))
+# Master table editor
+st.subheader("Master Table")
+# edited_master = st.data_editor(all_tracks_pd, num_rows="dynamic")
+
+# Configure AgGrid
+gb = GridOptionsBuilder.from_dataframe(all_tracks_pd)
+gb.configure_default_column(editable=True, groupable=True)
+gb.configure_selection("multiple", use_checkbox=True)
+grid_options = gb.build()
+
+# Display AgGrid
+grid_response = AgGrid(
+    all_tracks_pd,
+    gridOptions=grid_options,
+    enable_enterprise_modules=True,
+    height=300,
+    allow_unsafe_jscode=True,
+)
+
+st.write("Selected Rows:", grid_response["selected_rows"])
+
+# Generate target tables
+for i in range(num_tables):
+    st.subheader(f"Setlist Part {i + 1}")
+    st.session_state.tables[i] = st.data_editor(
+        st.session_state.tables[i], num_rows="dynamic", key=f"table_{i}"
+    )
+    st.text(
+        f"Duration: {round(st.session_state.tables[i]['duration_ms'].astype(int).sum() / 1000 / 60, 2)} minutes "
+    )
