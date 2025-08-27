@@ -1,5 +1,8 @@
-streamlit
+streamlit==1.48.1
+streamlit-aggrid
 spotipy
 pytest
 pandas
 pyyaml
+dash
+dash_bootstrap_components
