@@ -40,14 +40,12 @@ class Spotify:
         tracks_pd_list = list()
         for track in playlist_tracks:
             sub_dict = {
-                k: track["track"][k]
-                for k in ("name", "duration_ms", "artists", "album")
+                k: track["track"][k] for k in ("name", "duration_ms", "artists")
             }
             tracks_pd_list.append(sub_dict)
 
         tracks_pd = pd.DataFrame.from_dict(tracks_pd_list)
         tracks_pd["artist"] = tracks_pd.apply(lambda x: x["artists"][0]["name"], axis=1)
-        tracks_pd["album"] = tracks_pd.apply(lambda x: x["album"]["name"], axis=1)
         tracks_pd["duration"] = tracks_pd.apply(
             lambda x: convert_ms_to_readable(x["duration_ms"]), axis=1
         )
