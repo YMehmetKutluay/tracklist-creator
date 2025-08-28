@@ -2,6 +2,8 @@
 
 Simple Streamlit app to help create setlists for concerts. It is made for internal use by a cover band, but feel free to clone and tweak as you wish! Suggestions/feedback/debugging requests always welcome.
 
+The app is currently [live](https://the-alternative-tracklist-creator.streamlit.app/), with restricted access. If you want access, then please open an issue in the Github repo page or send an email to mehkutluay@gmail.com.
+
 # Getting Started
 
 ## Set up development environment
